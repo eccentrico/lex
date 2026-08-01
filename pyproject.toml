@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=77.0,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lex"
+version = "2.0.0"
+description = "A conversational finance agent for the Indian stock market."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Rinventix" }]
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  # LLM client (lex/llm.py talks to the custom/OpenAI-compatible endpoint).
+  "openai==2.24.0",
+  # Terminal rendering for the REPL (lex/repl.py).
+  "rich==14.3.3",
+  # Web search tool (lex/tools/web.py).
+  "ddgs==9.14.4",
+  # .env loading for Kite + LLM credentials (services/kite_auth.py, services/kite_data.py).
+  "python-dotenv==1.2.2",
+  # Zerodha Kite Connect client — market data + portfolio (services/kite_data.py,
+  # services/kite_auth.py).
+  "kiteconnect==5.2.0",
+  # kiteconnect's __init__ unconditionally imports KiteTicker, which pulls in
+  # pyOpenSSL. Pin both explicitly so kiteconnect can't silently drag in a
+  # newer pyOpenSSL/service-identity pair that requires a cryptography floor
+  # we haven't vetted.
+  "pyOpenSSL==25.3.0",
+  "service-identity==24.2.0",
+  # services/kite_data.py, services/valuation/dcf.py (fundamentals + price frames).
+  "pandas==3.0.3",
+  # HTTP client used by services/indian_data (BSE/NSE announcement scraping)
+  # and lex/tools/web.py.
+  "requests==2.33.0",  # CVE-2026-25645
+  # services/kite_auth.py — TOTP codes for Kite's 2FA login step.
+  "pyotp==2.10.0",
+  # services/market_calendar.py — IST market-hours calendar.
+  "pytz==2026.2",
+  # services/indian_data/screener_service.py — HTML scraping (bs4).
+  "beautifulsoup4==4.15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  # Test runner (tests/, tests/conftest.py).
+  "pytest==9.0.2",
+  # Lint (see [tool.ruff] below — only PLW1514 is enforced).
+  "ruff==0.15.10",
+]
+
+[project.scripts]
+lex = "lex.repl:main"
+
+[tool.setuptools.packages.find]
+# Flat layout with two top-level packages (lex/ is the agent, services/ is
+# the finance data layer it calls into) — setuptools' auto-discovery
+# refuses to guess between them, so list both explicitly.
+include = ["lex", "lex.*", "services", "services.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+preview = true  # required for PLW1514 (unspecified-encoding) — preview rule
+
+[tool.ruff.lint]
+# All other lints are intentionally disabled while we wrangle typechecks —
+# but PLW1514 is too load-bearing to keep off. Bare open()/read_text()/
+# write_text() in text mode defaults to the system locale encoding on
+# Windows (cp1252 on US-locale installs), which silently corrupts any
+# non-ASCII file content.
+select = ["PLW1514"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can intentionally exercise locale-encoding edge cases.
+"tests/**" = ["PLW1514"]

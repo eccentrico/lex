@@ -1,0 +1,46 @@
+.DS_Store
+__pycache__/
+*.pyc*
+.venv/
+.venv
+.vscode/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.pip-cache/
+.uv-cache/
+logs/
+data/
+.pytest_cache/
+test_durations.json
+.pytest-cache/
+.ruff_cache/
+tmp/
+
+# Private keys
+*.ppk
+*.pem
+privvy*
+
+lex.egg-info/
+*.egg-info/
+
+# CLI config (may contain sensitive SSH paths)
+cli-config.yaml
+
+.worktrees/
+
+# Local editor / agent tooling (machine-specific; keep in global config, not the repo)
+.codex/
+.cursor/
+.gemini/
+.zed/
+.mcp.json
+opencode.json
+
+# Lex scratch/planning directory — not part of the shipped agent.
+.superpowers/
