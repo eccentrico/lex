@@ -11,7 +11,8 @@ from lex.tools.portfolio import (
 from lex.tools.technicals import handle_technicals
 from lex.tools.watchlist import (
     handle_watchlist_add, handle_watchlist_remove, handle_watchlist_status)
-from lex.tools.mutual_funds import handle_fund_search, handle_fund_quote
+from lex.tools.mutual_funds import (
+    handle_fund_search, handle_fund_quote, handle_fund_history)
 from lex.tools.web import (
     handle_web_search, handle_web_fetch)
 
@@ -91,6 +92,17 @@ TOOLS = {
                 "required": ["scheme_codes"]},
         },
         "handler": handle_fund_quote,
+    },
+    "fund_history": {
+        "schema": {
+            "name": "fund_history",
+            "description": "Daily NAV history for one mutual fund scheme_code between two dates (YYYY-MM-DD), sourced from AMFI.",
+            "parameters": {"type": "object", "properties": {
+                "scheme_code": {"type": "string"},
+                "from_date": {"type": "string"}, "to_date": {"type": "string"}},
+                "required": ["scheme_code", "from_date", "to_date"]},
+        },
+        "handler": handle_fund_history,
     },
     "price_history": {
         "schema": {

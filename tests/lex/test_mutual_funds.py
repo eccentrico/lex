@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from lex.tools.mutual_funds import (
-    search_schemes, handle_fund_search, handle_fund_quote)
+    search_schemes, handle_fund_search, handle_fund_quote, handle_fund_history)
 
 MF_DF = pd.DataFrame([
     {"tradingsymbol": "120503", "name": "PARAG PARIKH FLEXI CAP FUND - DIRECT GROWTH",
@@ -71,3 +71,26 @@ def test_tools_dict_registers_fund_search_and_quote():
     from lex.tools import TOOLS
     assert TOOLS["fund_search"]["schema"]["name"] == "fund_search"
     assert TOOLS["fund_quote"]["schema"]["name"] == "fund_quote"
+
+
+def test_handle_fund_history_returns_rows(monkeypatch):
+    from unittest.mock import patch
+    fake = [{"date": "2026-08-01", "nav": 74.5}]
+    with patch("services.indian_data.mutual_funds.get_nav_history", return_value=fake):
+        out = json.loads(handle_fund_history(
+            {"scheme_code": "120503", "from_date": "2026-08-01", "to_date": "2026-08-02"}))
+    assert out["success"] and out["data"]["rows"] == fake
+
+
+def test_handle_fund_history_error_enveloped(monkeypatch):
+    from unittest.mock import patch
+    with patch("services.indian_data.mutual_funds.get_nav_history",
+              side_effect=RuntimeError("amfi down")):
+        out = json.loads(handle_fund_history(
+            {"scheme_code": "120503", "from_date": "2026-08-01", "to_date": "2026-08-02"}))
+    assert out["success"] is False and "amfi down" in out["error"]
+
+
+def test_tools_dict_registers_fund_history():
+    from lex.tools import TOOLS
+    assert TOOLS["fund_history"]["schema"]["name"] == "fund_history"

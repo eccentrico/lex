@@ -48,3 +48,13 @@ def handle_fund_quote(args: dict, **kwargs) -> str:
         return _ok(kite_data.get_mf_quote(codes))
     except Exception as e:
         return _err(e)
+
+
+def handle_fund_history(args: dict, **kwargs) -> str:
+    try:
+        from services.indian_data import mutual_funds
+        scheme_code = str(args["scheme_code"])
+        rows = mutual_funds.get_nav_history(scheme_code, args["from_date"], args["to_date"])
+        return _ok({"scheme_code": scheme_code, "rows": rows})
+    except Exception as e:
+        return _err(e)
