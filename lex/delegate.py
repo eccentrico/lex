@@ -13,12 +13,17 @@ RESEARCH_TOOL_NAMES = frozenset({
     # read our previous verdict stops being an independent look.
     "corporate_actions", "ownership_signals", "peer_comparison", "technicals"})
 
+# Same isolation rationale, fund side: read-only fund/web data only, no
+# mf_watchlist, no fund_research_history/get, no recursive delegation.
+RESEARCH_FUND_TOOL_NAMES = frozenset({
+    "fund_search", "fund_quote", "fund_history", "web_search", "web_fetch"})
 
-def run_pass(brief: str, pass_type: str) -> str:
-    """Run one research-pipeline pass over the restricted tool set; return its report text."""
+
+def run_pass(brief: str, pass_type: str, tools: frozenset = RESEARCH_TOOL_NAMES) -> str:
+    """Run one research-pipeline pass over `tools`; return its report text."""
     from lex import agent, llm, prompt
     from lex.tools import TOOLS
-    sub_tools = {k: v for k, v in TOOLS.items() if k in RESEARCH_TOOL_NAMES}
+    sub_tools = {k: v for k, v in TOOLS.items() if k in tools}
     messages = [
         {"role": "system", "content": prompt.subagent_prompt(pass_type)},
         {"role": "user", "content": brief},

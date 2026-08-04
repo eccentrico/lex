@@ -44,3 +44,4 @@ opencode.json
 
 # Lex scratch/planning directory — not part of the shipped agent.
 .superpowers/
+docs/superpowers/
