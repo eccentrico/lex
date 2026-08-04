@@ -34,6 +34,22 @@ def _lazy_research_get(args):
     from lex.reports import handle_research_get
     return handle_research_get(args)
 
+
+def _lazy_fund_research(args):
+    """Lazy import: lex.fund_research reaches back into this module's TOOLS dict."""
+    from lex.fund_research import handle_fund_research
+    return handle_fund_research(args)
+
+
+def _lazy_fund_research_history(args):
+    from lex.fund_reports import handle_fund_research_history
+    return handle_fund_research_history(args)
+
+
+def _lazy_fund_research_get(args):
+    from lex.fund_reports import handle_fund_research_get
+    return handle_fund_research_get(args)
+
 TOOLS = {
     "symbol_search": {
         "schema": {
@@ -142,6 +158,53 @@ TOOLS = {
             "parameters": {"type": "object", "properties": {}},
         },
         "handler": handle_mf_watchlist_status,
+    },
+    "fund_research": {
+        "schema": {
+            "name": "fund_research",
+            "description": ("Full multi-pass research on one mutual fund scheme: a facts "
+                            "pass, a narrative pass, then an adversarial bear pass, "
+                            "synthesised into a sectioned report with a verdict and "
+                            "confidence. This is the tool for 'analyse this fund' / "
+                            "comparisons (one call per scheme_code). It is slow and "
+                            "expensive — never use it for a single NAV or ratio."),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "scheme_code": {"type": "string", "description": "Exact AMFI scheme code"},
+                    "brief": {"type": "string", "description": "Optional extra focus, e.g. 'the user cares about the expense ratio and manager tenure'"},
+                    "depth": {"type": "string", "description": "full (default, 3 passes) | brief (facts + bear only, faster)"},
+                },
+                "required": ["scheme_code"],
+            },
+        },
+        "handler": _lazy_fund_research,
+    },
+    "fund_research_history": {
+        "schema": {
+            "name": "fund_research_history",
+            "description": ("Past fund_research reports saved for a scheme, newest first, "
+                            "with their date and verdict. Check this before running "
+                            "fund_research so you can talk about what changed instead of "
+                            "starting from scratch."),
+            "parameters": {"type": "object", "properties": {
+                "scheme_code": {"type": "string", "description": "Exact AMFI scheme code"}},
+                "required": ["scheme_code"]},
+        },
+        "handler": _lazy_fund_research_history,
+    },
+    "fund_research_get": {
+        "schema": {
+            "name": "fund_research_get",
+            "description": ("Read back one saved fund research report in full (sections + "
+                            "verdict). n=1 is the most recent; use fund_research_history to "
+                            "see what exists."),
+            "parameters": {"type": "object", "properties": {
+                "scheme_code": {"type": "string", "description": "Exact AMFI scheme code"},
+                "n": {"type": "integer", "description": "1 = latest (default)"}},
+                "required": ["scheme_code"]},
+        },
+        "handler": _lazy_fund_research_get,
     },
     "price_history": {
         "schema": {
