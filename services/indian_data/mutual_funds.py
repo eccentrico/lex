@@ -79,17 +79,19 @@ def _amfi_date(iso_date: str) -> str:
 def _parse_nav_history(text: str, scheme_code: str) -> list[dict]:
     """Parse AMFI's semicolon-delimited report, filtered to one scheme code.
 
-    Columns: Scheme Code;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;
-    Scheme Name;Net Asset Value;Date
+    Real column layout (verified against live AMFI endpoint, 2026-08-02):
+    0=Scheme Code, 1=Scheme Name, 2=ISIN Div Payout/ISIN Growth,
+    3=ISIN Div Reinvestment, 4=Net Asset Value, 5=Repurchase Price,
+    6=Sale Price, 7=Date
     """
     rows = []
     for line in text.splitlines():
         parts = [p.strip() for p in line.split(";")]
-        if len(parts) < 6 or parts[0] != scheme_code:
+        if len(parts) < 8 or parts[0] != scheme_code:
             continue
         try:
             nav = float(parts[4])
-            date = datetime.strptime(parts[5], "%d-%b-%Y").strftime("%Y-%m-%d")
+            date = datetime.strptime(parts[7], "%d-%b-%Y").strftime("%Y-%m-%d")
         except (ValueError, IndexError):
             continue
         rows.append({"date": date, "nav": nav})

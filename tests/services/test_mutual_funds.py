@@ -1,9 +1,9 @@
 from services.indian_data import mutual_funds
 
 _SAMPLE = (
-    "120503;INF879O01019;INF879O01027;Parag Parikh Flexi Cap Fund - Direct Growth;74.5000;01-Aug-2026\n"
-    "120503;INF879O01019;INF879O01027;Parag Parikh Flexi Cap Fund - Direct Growth;75.1000;02-Aug-2026\n"
-    "999999;XXXXXXXXXXX;XXXXXXXXXXX;Some Other Fund;10.0000;01-Aug-2026\n"
+    "120503;Parag Parikh Flexi Cap Fund - Direct Growth;INF879O01019;INF879O01027;74.5000;74.3000;74.6000;01-Aug-2026\n"
+    "120503;Parag Parikh Flexi Cap Fund - Direct Growth;INF879O01019;INF879O01027;75.1000;74.9000;75.2000;02-Aug-2026\n"
+    "999999;Some Other Fund;XXXXXXXXXXX;XXXXXXXXXXX;10.0000;9.8000;10.2000;01-Aug-2026\n"
 )
 
 
