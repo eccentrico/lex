@@ -121,6 +121,8 @@ class KiteDataService:
         self._token_saved_at: Optional[datetime] = None  # when the current token was obtained
         self._instruments_cache: Optional[pd.DataFrame] = None
         self._instruments_cache_time: Optional[datetime] = None
+        self._mf_instruments_cache: Optional[pd.DataFrame] = None
+        self._mf_instruments_cache_time: Optional[datetime] = None
         self._cache_ttl: timedelta = timedelta(hours=24)  # Cache instruments for 24 hours
         self._token_max_age: timedelta = timedelta(hours=6)  # Proactively refresh tokens older than 6h
         # Reentrant lock: serialises set_access_token + the first API call that follows,
@@ -359,7 +361,78 @@ class KiteDataService:
                 logger.warning("Using expired instruments cache")
                 return self._instruments_cache
             raise
-    
+
+    def _get_mf_instruments(self) -> pd.DataFrame:
+        """
+        Get and cache the mutual fund scheme master + latest NAV from Kite Connect.
+
+        Returns:
+            DataFrame with columns: tradingsymbol (the AMFI scheme code), name,
+            amc, plan, scheme_type, last_price, last_price_date, etc.
+        """
+        if not self._access_token:
+            raise RuntimeError(
+                "Not authenticated. Call set_access_token() first."
+            )
+
+        if (self._mf_instruments_cache is not None and
+            self._mf_instruments_cache_time is not None and
+            datetime.now() - self._mf_instruments_cache_time < self._cache_ttl):
+            return self._mf_instruments_cache
+
+        try:
+            instruments = self._retry_with_auth(self._kite.mf_instruments)
+            df = pd.DataFrame(instruments)
+            self._mf_instruments_cache = df
+            self._mf_instruments_cache_time = datetime.now()
+            logger.info(f"Fetched and cached {len(df)} MF instruments")
+            return df
+        except Exception as e:
+            logger.error(f"Error fetching MF instruments: {e}")
+            if self._mf_instruments_cache is not None:
+                logger.warning("Using expired MF instruments cache")
+                return self._mf_instruments_cache
+            raise
+
+    def get_mf_quote(self, scheme_codes: List[str]) -> Dict[str, Dict[str, Any]]:
+        """
+        Latest NAV + scheme metadata for a list of AMFI scheme codes.
+
+        Kite's MF `tradingsymbol` field is the AMFI scheme code; this is the
+        canonical identifier used across every mutual-fund tool.
+
+        Args:
+            scheme_codes: AMFI scheme codes (as returned by fund_search).
+
+        Returns:
+            Dict mapping scheme_code -> {scheme_code, name, amc, plan,
+            scheme_type, nav, nav_date}. A code with no matching instrument is
+            simply absent from the result.
+        """
+        if not scheme_codes:
+            return {}
+        try:
+            df = self._get_mf_instruments()
+        except Exception as e:
+            logger.error(f"get_mf_quote: could not load MF instruments: {e}")
+            return {}
+        result = {}
+        for code in scheme_codes:
+            match = df[df["tradingsymbol"].astype(str) == str(code)]
+            if len(match) == 0:
+                continue
+            row = match.iloc[0]
+            result[str(code)] = {
+                "scheme_code": str(code),
+                "name": row.get("name", ""),
+                "amc": row.get("amc", ""),
+                "plan": row.get("plan", ""),
+                "scheme_type": row.get("scheme_type", ""),
+                "nav": float(row.get("last_price", 0) or 0),
+                "nav_date": str(row.get("last_price_date", "")),
+            }
+        return result
+
     def _symbol_to_token(self, symbol: str) -> Optional[int]:
         """
         Convert trading symbol to instrument token.

@@ -11,6 +11,7 @@ from lex.tools.portfolio import (
 from lex.tools.technicals import handle_technicals
 from lex.tools.watchlist import (
     handle_watchlist_add, handle_watchlist_remove, handle_watchlist_status)
+from lex.tools.mutual_funds import handle_fund_search, handle_fund_quote
 from lex.tools.web import (
     handle_web_search, handle_web_fetch)
 
@@ -50,6 +51,25 @@ TOOLS = {
         },
         "handler": handle_symbol_search,
     },
+    "fund_search": {
+        "schema": {
+            "name": "fund_search",
+            "description": (
+                "Look up mutual fund schemes by name or AMC. Use before any tool "
+                "that needs an exact scheme_code (e.g. 'parag parikh flexi cap "
+                "direct' -> scheme_code)."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Scheme name or AMC"},
+                    "limit": {"type": "integer", "description": "Max results (default 5)"},
+                },
+                "required": ["query"],
+            },
+        },
+        "handler": handle_fund_search,
+    },
     "market_quote": {
         "schema": {
             "name": "market_quote",
@@ -60,6 +80,17 @@ TOOLS = {
                 "required": ["symbols"]},
         },
         "handler": handle_market_quote,
+    },
+    "fund_quote": {
+        "schema": {
+            "name": "fund_quote",
+            "description": "Latest NAV, AMC, plan and scheme type for up to 25 mutual fund scheme_codes.",
+            "parameters": {"type": "object", "properties": {
+                "scheme_codes": {"type": "array", "items": {"type": "string"},
+                                 "description": "Exact AMFI scheme codes (from fund_search)"}},
+                "required": ["scheme_codes"]},
+        },
+        "handler": handle_fund_quote,
     },
     "price_history": {
         "schema": {
