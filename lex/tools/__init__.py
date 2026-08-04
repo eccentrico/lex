@@ -13,6 +13,8 @@ from lex.tools.watchlist import (
     handle_watchlist_add, handle_watchlist_remove, handle_watchlist_status)
 from lex.tools.mutual_funds import (
     handle_fund_search, handle_fund_quote, handle_fund_history)
+from lex.tools.mf_watchlist import (
+    handle_mf_watchlist_add, handle_mf_watchlist_remove, handle_mf_watchlist_status)
 from lex.tools.web import (
     handle_web_search, handle_web_fetch)
 
@@ -103,6 +105,43 @@ TOOLS = {
                 "required": ["scheme_code", "from_date", "to_date"]},
         },
         "handler": handle_fund_history,
+    },
+    "mf_watchlist_add": {
+        "schema": {
+            "name": "mf_watchlist_add",
+            "description": "Add a mutual fund scheme to your watchlist for tracking NAV changes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "scheme_code": {"type": "string", "description": "AMFI scheme code (from fund_search)"},
+                    "note": {"type": "string", "description": "Optional note"},
+                },
+                "required": ["scheme_code"],
+            },
+        },
+        "handler": handle_mf_watchlist_add,
+    },
+    "mf_watchlist_remove": {
+        "schema": {
+            "name": "mf_watchlist_remove",
+            "description": "Remove a mutual fund scheme from your watchlist.",
+            "parameters": {
+                "type": "object",
+                "properties": {"scheme_code": {"type": "string"}},
+                "required": ["scheme_code"],
+            },
+        },
+        "handler": handle_mf_watchlist_remove,
+    },
+    "mf_watchlist_status": {
+        "schema": {
+            "name": "mf_watchlist_status",
+            "description": ("What changed on the fund watchlist since last check: NAV moves "
+                            "vs baseline. Call only when the user explicitly asks about their "
+                            "fund watchlist — never on a bare greeting."),
+            "parameters": {"type": "object", "properties": {}},
+        },
+        "handler": handle_mf_watchlist_status,
     },
     "price_history": {
         "schema": {
