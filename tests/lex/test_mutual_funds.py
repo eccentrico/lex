@@ -29,6 +29,19 @@ def test_finds_by_exact_scheme_code():
     assert out[0]["tradingsymbol"] == "120503"
 
 
+def test_finds_by_amc():
+    out = search_schemes("PPFAS", instruments_df=MF_DF)
+    assert len(out) == 2
+    assert out[0]["amc"] == "PPFAS"
+    assert out[1]["amc"] == "PPFAS"
+
+
+def test_finds_by_amc_lowercase():
+    out = search_schemes("hdfc", instruments_df=MF_DF)
+    assert len(out) == 1
+    assert out[0]["tradingsymbol"] == "100001"
+
+
 def test_no_match_returns_empty():
     assert search_schemes("zzzz-not-a-fund", instruments_df=MF_DF) == []
 

@@ -20,7 +20,8 @@ def search_schemes(query: str, limit: int = 5, instruments_df=None) -> list:
     if len(exact):
         return exact.head(limit).to_dict("records")
 
-    name_hit = df[df["name"].str.upper().str.contains(q, regex=False, na=False)]
+    name_hit = df[df["name"].str.upper().str.contains(q, regex=False, na=False) |
+                  df["amc"].str.upper().str.contains(q, regex=False, na=False)]
 
     names = df["name"].str.upper().tolist()
     fuzzy_names = set(difflib.get_close_matches(q, names, n=limit, cutoff=0.6))
