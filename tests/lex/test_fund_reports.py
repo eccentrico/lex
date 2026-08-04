@@ -138,6 +138,18 @@ def test_fund_research_saves_and_then_runs_in_update_mode(lex_home_tmp, stub_pas
     assert len(fund_reports.history("120503")) == 2
 
 
+def test_sections_and_render_tables_stay_in_sync():
+    """fund_research.SECTIONS and fund_reports' render tables are built apart.
+
+    Nothing but this test stops a new section from being added to one and
+    silently dropped from the rendered report (or a _GROUPS typo from hiding
+    a section entirely).
+    """
+    assert set(fund_reports._TITLES) | {"verdict"} == set(fund_research.SECTIONS)
+    grouped = {n for _, names in fund_reports._GROUPS for n in names}
+    assert grouped == set(fund_reports._TITLES)
+
+
 def test_tools_dict_registers_fund_research_tools():
     from lex.tools import TOOLS
     for name in ("fund_research", "fund_research_history", "fund_research_get"):

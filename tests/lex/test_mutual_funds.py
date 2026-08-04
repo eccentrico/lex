@@ -91,6 +91,27 @@ def test_handle_fund_history_error_enveloped(monkeypatch):
     assert out["success"] is False and "amfi down" in out["error"]
 
 
+def test_handle_fund_history_separates_no_data_from_an_outage():
+    """A fund with genuinely no NAV history must not look like an AMFI outage.
+
+    get_nav_history raises when it cannot reach AMFI and has nothing cached, so
+    success=True with rows=[] means "no NAV published here" and success=False
+    means "we could not find out" — the facts pass writes "unknown" only for
+    the latter.
+    """
+    from unittest.mock import patch
+    args = {"scheme_code": "120503", "from_date": "2026-07-01", "to_date": "2026-07-06"}
+
+    with patch("services.indian_data.mutual_funds.get_nav_history", return_value=[]):
+        empty = json.loads(handle_fund_history(args))
+    assert empty["success"] is True and empty["data"]["rows"] == []
+
+    with patch("services.indian_data.mutual_funds.get_nav_history",
+               side_effect=RuntimeError("AMFI NAV history unavailable for scheme 120503")):
+        outage = json.loads(handle_fund_history(args))
+    assert outage["success"] is False and "unavailable" in outage["error"]
+
+
 def test_tools_dict_registers_fund_history():
     from lex.tools import TOOLS
     assert TOOLS["fund_history"]["schema"]["name"] == "fund_history"
