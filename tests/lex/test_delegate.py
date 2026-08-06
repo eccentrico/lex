@@ -10,8 +10,10 @@ def test_restricted_tool_set_is_read_only_market_and_web():
                  "deep_research"}
     assert not (allowed & forbidden)
     assert {"symbol_search", "market_quote", "fundamentals",
-            "market_events", "web_search", "web_fetch",
-            "groww_quote", "groww_price_history"} <= allowed
+            "market_events", "web_search", "web_fetch"} <= allowed
+    # Groww tools are explicit-only (user must ask) — a research subagent has
+    # no user turn to evaluate that condition, so it must never get them.
+    assert {"groww_quote", "groww_price_history"}.isdisjoint(delegate.RESEARCH_TOOL_NAMES)
 
 
 def test_tools_dict_includes_groww_tools():
