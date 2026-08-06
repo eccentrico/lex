@@ -17,6 +17,7 @@ from lex.tools.mf_watchlist import (
     handle_mf_watchlist_add, handle_mf_watchlist_remove, handle_mf_watchlist_status)
 from lex.tools.web import (
     handle_web_search, handle_web_fetch)
+from lex.tools.groww import handle_groww_quote, handle_groww_price_history
 
 
 def _lazy_deep_research(args):
@@ -217,6 +218,37 @@ TOOLS = {
                 "required": ["symbol", "from_date", "to_date"]},
         },
         "handler": handle_price_history,
+    },
+    "groww_quote": {
+        "schema": {
+            "name": "groww_quote",
+            "description": ("Live quotes for up to 25 NSE symbols via Groww's Trade API — an "
+                            "explicit secondary source, separate from Kite's market_quote. Use "
+                            "only when the user asks to cross-check a price against Groww or "
+                            "says Kite's feed looks off; never as a silent fallback."),
+            "parameters": {"type": "object", "properties": {
+                "symbols": {"type": "array", "items": {"type": "string"},
+                            "description": "Exact NSE tradingsymbols"}},
+                "required": ["symbols"]},
+        },
+        "handler": handle_groww_quote,
+    },
+    "groww_price_history": {
+        "schema": {
+            "name": "groww_price_history",
+            "description": ("Daily OHLC candle data for one NSE symbol between two dates "
+                            "(YYYY-MM-DD) via Groww's Trade API — an explicit secondary source, "
+                            "separate from Kite's price_history. Use only when the user asks to "
+                            "cross-check against Groww; never as a silent fallback. Only the "
+                            "'day' interval is supported."),
+            "parameters": {"type": "object", "properties": {
+                "symbol": {"type": "string"},
+                "from_date": {"type": "string"}, "to_date": {"type": "string"},
+                "interval": {"type": "string",
+                            "description": "day (default) — the only supported value"}},
+                "required": ["symbol", "from_date", "to_date"]},
+        },
+        "handler": handle_groww_price_history,
     },
     "market_overview": {
         "schema": {

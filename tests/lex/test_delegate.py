@@ -10,7 +10,14 @@ def test_restricted_tool_set_is_read_only_market_and_web():
                  "deep_research"}
     assert not (allowed & forbidden)
     assert {"symbol_search", "market_quote", "fundamentals",
-            "market_events", "web_search", "web_fetch"} <= allowed
+            "market_events", "web_search", "web_fetch",
+            "groww_quote", "groww_price_history"} <= allowed
+
+
+def test_tools_dict_includes_groww_tools():
+    from lex.tools import TOOLS
+    assert TOOLS["groww_quote"]["schema"]["name"] == "groww_quote"
+    assert TOOLS["groww_price_history"]["schema"]["name"] == "groww_price_history"
 
 
 def test_run_pass_uses_restricted_tools_and_pass_specific_prompt(monkeypatch):

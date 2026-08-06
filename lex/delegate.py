@@ -11,7 +11,10 @@ RESEARCH_TOOL_NAMES = frozenset({
     # public market structure, nothing about the user. Saved-research tools
     # (research_history/research_get) stay out on purpose — a pass that can
     # read our previous verdict stops being an independent look.
-    "corporate_actions", "ownership_signals", "peer_comparison", "technicals"})
+    "corporate_actions", "ownership_signals", "peer_comparison", "technicals",
+    # Groww is a second read-only market-data source, same rationale as
+    # market_quote/price_history above — it exposes no user-specific state.
+    "groww_quote", "groww_price_history"})
 
 # Same isolation rationale, fund side: read-only fund/web data only, no
 # mf_watchlist, no fund_research_history/get, no recursive delegation.
