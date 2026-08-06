@@ -29,8 +29,12 @@ dependencies = [
   # we haven't vetted.
   "pyOpenSSL==25.3.0",
   "service-identity==24.2.0",
+  # Groww Trade API client — secondary, explicit market-data source
+  # (services/groww_data.py, services/groww_auth.py). Verified against
+  # growwapi 1.5.0 on PyPI.
+  "growwapi==1.5.0",
   # services/kite_data.py, services/valuation/dcf.py (fundamentals + price frames).
-  "pandas==3.0.3",
+  "pandas==2.2.3",
   # HTTP client used by services/indian_data (BSE/NSE announcement scraping)
   # and lex/tools/web.py.
   "requests==2.33.0",  # CVE-2026-25645
