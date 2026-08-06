@@ -17,3 +17,14 @@ def test_subagent_prompt_resolves_fund_passes():
 def test_equity_passes_still_resolve():
     assert prompt.FACTS_PASS in prompt.subagent_prompt("facts")
     assert prompt.BEAR_PASS in prompt.subagent_prompt("bear")
+
+
+def test_build_system_prompt_includes_groww_guidance():
+    text = prompt.build_system_prompt("")
+    assert "groww_quote" in text
+    assert "groww_price_history" in text
+
+
+def test_persona_distinguishes_kite_and_groww_auth_errors():
+    assert "kite_auth" in prompt.PERSONA
+    assert "Groww" in prompt.PERSONA
