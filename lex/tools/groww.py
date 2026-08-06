@@ -10,7 +10,10 @@ from lex.tools.common import _ok, _err
 def handle_groww_quote(args: dict, **kwargs) -> str:
     try:
         from services.groww_data import groww_data
-        symbols = [s.upper() for s in args["symbols"]][:25]
+        symbols = args["symbols"]
+        if isinstance(symbols, str):
+            symbols = [symbols]
+        symbols = [s.upper() for s in symbols][:25]
         return _ok(groww_data.get_quotes(symbols))
     except Exception as e:
         return _err(e)

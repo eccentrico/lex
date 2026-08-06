@@ -240,7 +240,9 @@ TOOLS = {
                             "(YYYY-MM-DD) via Groww's Trade API — an explicit secondary source, "
                             "separate from Kite's price_history. Use only when the user asks to "
                             "cross-check against Groww; never as a silent fallback. Only the "
-                            "'day' interval is supported."),
+                            "'day' interval is supported. The response's 'raw' field is Groww's "
+                            "unparsed payload, not normalized to price_history's 'rows' format — "
+                            "don't assume the same schema as Kite's price_history tool."),
             "parameters": {"type": "object", "properties": {
                 "symbol": {"type": "string"},
                 "from_date": {"type": "string"}, "to_date": {"type": "string"},

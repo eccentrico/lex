@@ -11,6 +11,14 @@ def test_groww_quote_returns_quotes():
     assert out["success"] and out["data"]["RELIANCE"]["last_price"] == 2500.0
 
 
+def test_groww_quote_accepts_a_bare_string_symbol():
+    fake = {"RELIANCE": {"last_price": 2500.0}}
+    with patch("services.groww_data.groww_data.get_quotes", return_value=fake) as mock_get:
+        out = json.loads(handle_groww_quote({"symbols": "RELIANCE"}))
+    mock_get.assert_called_once_with(["RELIANCE"])
+    assert out["success"] and out["data"]["RELIANCE"]["last_price"] == 2500.0
+
+
 def test_groww_quote_error_is_enveloped():
     with patch("services.groww_data.groww_data.get_quotes",
                side_effect=RuntimeError("GROWW_API_KEY / GROWW_API_SECRET not set")):

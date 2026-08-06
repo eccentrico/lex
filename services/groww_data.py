@@ -6,10 +6,10 @@ alongside Kite (services/kite_data.py) — never used automatically, only when
 a caller specifically wants Groww's numbers (see lex/tools/groww.py).
 
 Quotes and historical data require Groww's paid API plan (~Rs 499/month); a
-free-tier key can resolve instruments but gets "Access forbidden" on
-get_quote/get_historical_candles — see docs/superpowers/plans/
-2026-08-06-groww-secondary-data-source.md for the verified live-call results.
-That 403 is a Groww account permission, not a bug in this module.
+free-tier key can resolve instruments but gets "Access forbidden" (HTTP 403)
+on get_quote/get_historical_candles — confirmed via a live call during
+development. That 403 is a Groww account permission, not a bug in this
+module.
 """
 import logging
 from datetime import datetime
@@ -64,7 +64,7 @@ class GrowwDataService:
         its lifetime.
         """
         client = self._get_client()
-        clean = symbol.replace("NSE:", "").strip().upper()
+        clean = symbol.strip().upper().replace("NSE:", "")
         return client.get_instrument_by_exchange_and_trading_symbol(
             exchange=GrowwAPI.EXCHANGE_NSE, trading_symbol=clean)
 
@@ -80,7 +80,7 @@ class GrowwDataService:
         client = self._get_client()
         result = {}
         for symbol in symbols:
-            clean = symbol.replace("NSE:", "").strip().upper()
+            clean = symbol.strip().upper().replace("NSE:", "")
             try:
                 result[symbol] = client.get_quote(
                     trading_symbol=clean, exchange=GrowwAPI.EXCHANGE_NSE,
@@ -96,9 +96,8 @@ class GrowwDataService:
         """Raw candle payload for one symbol between two dates (inclusive).
 
         Returns Groww's raw response dict rather than a DataFrame like
-        kite_data.get_historical_data — see this file's module docstring and
-        the implementation plan for why the exact candle schema can't be
-        verified yet.
+        kite_data.get_historical_data — see this file's module docstring for
+        why the exact candle schema can't be verified yet.
 
         Raises:
             ValueError: for an interval other than "day" (no other

@@ -29,10 +29,11 @@ class FakeGrowwAPI:
 @pytest.fixture(autouse=True)
 def _fresh_singleton(monkeypatch):
     """GrowwDataService is a singleton (mirrors KiteDataService) — reset its
-    class-level instance between tests so one test's fake client can't leak
-    into the next."""
+    class-level instance and the real module-level singleton's cached client
+    between tests so one test's fake client can't leak into the next."""
     gd.GrowwDataService._instance = None
     gd.GrowwDataService._initialized = False
+    gd.groww_data._client = None
     monkeypatch.setattr(gd, "get_or_renew_access_token", lambda: "fake-token")
     monkeypatch.setattr(gd, "GrowwAPI", FakeGrowwAPI)
 

@@ -33,6 +33,10 @@ python -m venv .venv
 `KITE_USER_ID`, `KITE_PASSWORD`, `KITE_TOTP_SECRET`) and the LLM endpoint
 (`OPENAI_API_KEY`/`OPENAI_BASE_URL`).
 
+`GROWW_API_KEY`/`GROWW_API_SECRET` (from Groww's API Keys dashboard, see
+`services/groww_auth.py`) are optional — Groww is a secondary, explicit-only
+data source and the app works fully without them.
+
 ## Run
 
 ```bash
