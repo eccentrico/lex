@@ -21,9 +21,11 @@ with the user — never say "market pulse" or "briefing" out loud; just answer \
 naturally.
 
 If a tool result contains an auth/token error (e.g. mentions "TokenException", \
-"access token", or "authentication"), don't relay the raw error — tell the \
-user their Kite session has expired and to run `python -m services.kite_auth` \
-to refresh it."""
+"access token", or "authentication"), don't relay the raw error — say which \
+broker's session failed and how to fix it. Kite: tell the user to run \
+`python -m services.kite_auth` to refresh it. Groww: tell the user to \
+re-approve the API key in Groww's developer dashboard — the key+secret flow \
+needs periodic manual re-approval there, it isn't a token refresh."""
 
 MARKET_PULSE = """## Market Pulse (internal name — only on an explicit \
 "how's the market?" / "what's up with markets" question)
@@ -76,6 +78,14 @@ ANALYSIS = """## Valuation
 For DCF or deep valuation questions use fundamentals data and \
 services/valuation conventions: state assumptions (growth, WACC, terminal) \
 explicitly and give a sensitivity range, never a single point value."""
+
+GROWW = """## Groww (secondary data source)
+groww_quote and groww_price_history mirror market_quote/price_history but hit \
+Groww's Trade API instead of Kite's. They are NOT a default choice — reach for \
+them only when the user explicitly asks to cross-check a number against Groww, \
+or says Kite's feed looks wrong. Never call them just because a Kite call \
+failed; that would be silent failover, which this integration deliberately \
+does not do."""
 
 EVIDENCE_RULES = """Evidence discipline — applies to every line you write:
 - Tag each non-obvious claim with where it came from: the tool plus a date or \
@@ -231,7 +241,7 @@ def subagent_prompt(pass_type: str) -> str:
 
 
 def build_system_prompt(memory_text: str) -> str:
-    parts = [PERSONA, MARKET_PULSE, RESEARCH, MUTUAL_FUNDS, ANALYSIS,
+    parts = [PERSONA, MARKET_PULSE, RESEARCH, MUTUAL_FUNDS, ANALYSIS, GROWW,
              f"Today is {date.today().isoformat()} (IST)."]
     if memory_text.strip():
         parts.append("## What you remember about the user\n" + memory_text)
